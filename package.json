@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/mariomarquesto/expo-ecommerce2/issues"
   },
-  "homepage": "https://github.com/mariomarquesto/expo-ecommerce2#readme"
+  "homepage": "https://github.com/mariomarquesto/expo-ecommerce2#readme",
+  "dependencies": {
+    "daisyui": "^5.5.14"
+  }
 }
