@@ -3,12 +3,18 @@ import express from "express";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
 
-// Configuraciones locales
+// --- CONFIGURACIONES LOCALES ---
 import { ENV } from "./config/env.js"; 
 import { connectDB } from "./config/db.js"; 
 
-// Importación de Rutas y Controladores
+// --- IMPORTACIÓN DE RUTAS ---
 import userRouter from "./routes/user.route.js";
+import productRouter from "./routes/product.route.js";    // Nueva
+import orderRouter from "./routes/order.route.js";      // Nueva
+import categoryRouter from "./routes/category.route.js";  // Nueva
+import statsRouter from "./routes/stats.route.js";      // Nueva
+
+// --- IMPORTACIÓN DE CONTROLADORES ---
 import { clerkWebhook } from "./controllers/webhook.controller.js";
 
 const app = express();
@@ -39,8 +45,12 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Rutas protegidas (Direcciones, Perfil, etc.)
-app.use("/api/users", userRouter);
+// Registro de todas las rutas del eCommerce
+app.use("/api/users", userRouter);           // Usuarios y perfiles
+app.use("/api/products", productRouter);     // Catálogo de productos
+app.use("/api/orders", orderRouter);         // Gestión de pedidos
+app.use("/api/categories", categoryRouter);   // Categorías de productos
+app.use("/api/stats", statsRouter);         // Estadísticas para el Admin
 
 // --- 5. CONFIGURACIÓN DE PRODUCCIÓN ---
 if (ENV.NODE_ENV === "production") {
@@ -65,6 +75,7 @@ const startServer = async () => {
     app.listen(ENV.PORT, () => {
       console.log(`🚀 Server running on port ${ENV.PORT}`);
       console.log(`🔗 Webhook URL: http://localhost:${ENV.PORT}/api/webhooks/clerk`);
+      console.log(`📂 Rutas cargadas: Users, Products, Orders, Categories, Stats`);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error.message);
