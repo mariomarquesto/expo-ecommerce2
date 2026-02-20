@@ -45,7 +45,7 @@ export async function createProduct(req, res) {
   }
 }
 
-export async function getAllProducts(_, res) {
+export async function getAllProducts(req, res) {
   try {
     // -1 means in desc order: most recent products first
     const products = await Product.find().sort({ createdAt: -1 });
@@ -96,7 +96,7 @@ export async function updateProduct(req, res) {
   }
 }
 
-export async function getAllOrders(_, res) {
+export async function getAllOrders(req, res) {
   try {
     const orders = await Order.find()
       .populate("user", "name email")

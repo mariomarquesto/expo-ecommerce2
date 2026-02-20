@@ -4,7 +4,7 @@ import { ENV } from "./env.js"; // Asegúrate de que el path sea correcto (env.j
 export const connectDB = async () => {
   try {
     // CORRECCIÓN CLAVE: Usar ENV.DB_URL para acceder a la URL desde el objeto ENV
-    const conn = await mongoose.connect(ENV.DB_URL);
+    const conn = await mongoose.connect(ENV.MONGO_URI);
     
     console.log(`✅ Connected to MONGODB: ${conn.connection.host}`);
   } catch (error) {

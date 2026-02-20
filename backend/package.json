@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon src/server.js",
-  "start": "node src/server.js"
-},
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -14,9 +14,11 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.59.1",
     "@clerk/express": "^1.7.59",
+    "cloudinary": "^2.9.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.2.1",
+    "express": "^4.22.1",
+    "mongodb": "^7.1.0",
     "mongoose": "^9.0.1",
     "svix": "^1.82.0"
   },
