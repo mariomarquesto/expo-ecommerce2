@@ -60,7 +60,7 @@ const seedDatabase = async () => {
     console.log("⏳ Intentando conectar a MongoDB Atlas...");
     
     // UNA SOLA CONEXIÓN con todos los parámetros de seguridad
-    await mongoose.connect(ENV.DB_URL, {
+    await mongoose.connect(ENV.MONGO_URI, {
       serverSelectionTimeoutMS: 30000, 
       connectTimeoutMS: 30000,
       family: 4, 
