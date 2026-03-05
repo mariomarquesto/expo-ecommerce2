@@ -20,20 +20,52 @@ export const NAVIGATION = [
 function Navbar() {
   const location = useLocation();
 
-  return (
-    <div className="navbar w-full bg-base-300">
-      <label htmlFor="my-drawer" className="btn btn-square btn-ghost" aria-label="open sidebar">
-        <PanelLeftIcon className="size-5" />
-      </label>
+  const currentPage =
+    NAVIGATION.find((item) => item.path === location.pathname)?.name ||
+    "Dashboard";
 
-      <div className="flex-1 px-4">
-        <h1 className="text-xl font-bold">
-          {NAVIGATION.find((item) => item.path === location.pathname)?.name || "Dashboard"}
-        </h1>
+  return (
+    <div className="navbar sticky top-0 z-40 bg-base-100/80 backdrop-blur-md border-b border-base-300">
+
+      {/* Left */}
+      <div className="flex items-center gap-2">
+        <label
+          htmlFor="my-drawer"
+          className="btn btn-ghost btn-circle hover:bg-base-200 transition"
+          aria-label="open sidebar"
+        >
+          <PanelLeftIcon className="size-5" />
+        </label>
+
+        <div className="hidden sm:block">
+          <h1 className="text-xl font-bold tracking-tight">
+            {currentPage}
+          </h1>
+          <p className="text-xs text-base-content/60">
+            Admin panel overview 
+          </p>
+        </div>
       </div>
 
-      <div className="mr-5">
-        <UserButton />
+      {/* Right */}
+      <div className="ml-auto flex items-center gap-4 pr-4">
+
+        {/* Optional notification badge placeholder */}
+        <button className="btn btn-ghost btn-circle hover:bg-base-200">
+          <div className="indicator">
+            <span className="indicator-item badge badge-xs badge-primary"></span>
+            <span className="text-lg">🔔</span>
+          </div>
+        </button>
+
+        {/* Clerk User */}
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: "w-10 h-10",
+            },
+          }}
+        />
       </div>
     </div>
   );

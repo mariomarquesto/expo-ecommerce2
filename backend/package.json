@@ -22,6 +22,7 @@
     "mongodb": "^7.1.0",
     "mongoose": "^9.2.4",
     "mongose": "^0.0.2-security",
+    "multer": "^2.1.1",
     "svix": "^1.82.0"
   },
   "devDependencies": {

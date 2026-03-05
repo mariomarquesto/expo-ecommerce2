@@ -1,21 +1,22 @@
-import { Outlet } from "react-router";
+import { Outlet } from "react-router-dom";
+import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 
 function DashboardLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <div className="drawer lg:drawer-open">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" defaultChecked />
+    <div className="flex h-screen bg-neutral-950 text-white">
+      
+      <Sidebar collapsed={collapsed} />
 
-      <div className="drawer-content">
-        <Navbar />
-
-        <main className="p-6">
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <Navbar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <main className="flex-1 overflow-auto p-8 bg-neutral-900">
           <Outlet />
         </main>
       </div>
-
-      <Sidebar />
     </div>
   );
 }
