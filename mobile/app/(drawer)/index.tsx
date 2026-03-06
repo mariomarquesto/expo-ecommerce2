@@ -11,9 +11,10 @@ import {
   
 } from 'react-native';
 import {  SafeAreaView } from 'react-native-safe-area-context';
+
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router'; 
-import { fetchProducts } from '../services/api'; 
+import { fetchProducts } from '../../services/api'; 
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 30) / 2;
