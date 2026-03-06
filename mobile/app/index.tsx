@@ -8,18 +8,22 @@ import {
   Image, 
   TouchableOpacity,
   Dimensions,
-  
+  Alert
 } from 'react-native';
-import {  SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router'; 
 import { fetchProducts } from '../services/api'; 
+import { useCartStore } from '../services/cartStore'; // Importamos el Store
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 30) / 2;
 
 export default function HomeScreen() {
   const router = useRouter();
+  
+  // Obtenemos la función para agregar al carrito desde el store
+  const addToCart = useCartStore((state) => state.addToCart);
 
   const { data: products, isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -45,7 +49,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['bottom']}>
       <FlatList
         data={products}
         keyExtractor={(item) => item._id}
@@ -55,6 +59,7 @@ export default function HomeScreen() {
           <TouchableOpacity 
             style={styles.card} 
             activeOpacity={0.9}
+            // Navegar al detalle si tocas la tarjeta
             onPress={() => router.push(`/product/${item._id}` as any)}
           >
             <View style={styles.imageContainer}>
@@ -78,9 +83,17 @@ export default function HomeScreen() {
                 <Text style={styles.price}>${item.price}</Text>
                 <Text style={styles.rating}>⭐ {item.averageRating || 5}</Text>
               </View>
-              <View style={styles.buyButton}>
-                <Text style={styles.buyButtonText}>Ver más</Text>
-              </View>
+              
+              {/* BOTÓN FUNCIONAL: Agrega al carrito */}
+              <TouchableOpacity 
+                style={styles.buyButton}
+                onPress={() => {
+                  addToCart(item);
+                  Alert.alert("¡Éxito!", `${item.name} añadido al carrito.`);
+                }}
+              >
+                <Text style={styles.buyButtonText}>Añadir al carrito</Text>
+              </TouchableOpacity>
             </View>
           </TouchableOpacity>
         )}
