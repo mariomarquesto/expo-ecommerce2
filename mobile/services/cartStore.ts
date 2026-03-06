@@ -6,6 +6,7 @@ interface CartItem {
   price: number;
   images: string[];
   quantity: number;
+  stock: number; // Cambiado de countInStock a stock
 }
 
 interface CartState {
@@ -13,7 +14,6 @@ interface CartState {
   addToCart: (product: any) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
-  getTotal: () => number;
 }
 
 export const useCartStore = create<CartState>((set, get) => ({
@@ -22,15 +22,26 @@ export const useCartStore = create<CartState>((set, get) => ({
   addToCart: (product) => {
     const currentItems = get().items;
     const existingItem = currentItems.find((item) => item._id === product._id);
+    
+    // Usamos product.stock que es como viene de tu base de datos
+    const stockAvailable = product.stock ?? 0;
 
     if (existingItem) {
-      set({
-        items: currentItems.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
-        ),
-      });
+      if (existingItem.quantity < stockAvailable) {
+        set({
+          items: currentItems.map((item) =>
+            item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          ),
+        });
+      } else {
+        alert("Límite de stock alcanzado");
+      }
     } else {
-      set({ items: [...currentItems, { ...product, quantity: 1 }] });
+      if (stockAvailable > 0) {
+        set({ items: [...currentItems, { ...product, quantity: 1 }] });
+      } else {
+        alert("Producto sin stock disponible");
+      }
     }
   },
 
@@ -46,8 +57,4 @@ export const useCartStore = create<CartState>((set, get) => ({
   },
 
   clearCart: () => set({ items: [] }),
-
-  getTotal: () => {
-    return get().items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  },
 }));
