@@ -9,13 +9,19 @@ export default function DrawerLayout() {
   return (
     <Drawer
       screenOptions={{
+        // --- Estilo del Header ---
         headerStyle: { backgroundColor: '#f3f706' },
-        headerTintColor: '#000',
+        headerTintColor: '#eb0b0b',
         headerTitle: 'Mi Tienda',
-        // Botón de usuario a la derecha
+        
+        // --- Colores Dinámicos del Menú Lateral ---
+        drawerActiveTintColor: '#eb0b0b', // Rojo cuando está seleccionado
+        drawerInactiveTintColor: '#333',   // Gris oscuro cuando no
+        drawerLabelStyle: { fontWeight: '600' },
+
+        // Botón de usuario a la derecha del Header
         headerRight: () => (
           <TouchableOpacity 
-            // Usamos 'as any' para silenciar el error de TS mientras se refrescan las rutas
             onPress={() => router.push('/login' as any)} 
             style={{ marginRight: 15 }}
           >
@@ -26,6 +32,7 @@ export default function DrawerLayout() {
         ),
       }}
     >
+      {/* 1. INICIO */}
       <Drawer.Screen
         name="index"
         options={{
@@ -35,7 +42,55 @@ export default function DrawerLayout() {
         }}
       />
 
-      
+      {/* 2. CARRITO */}
+      <Drawer.Screen
+        name="cart"
+        options={{
+          drawerLabel: 'Mi Carrito',
+          title: 'Carrito de Compras',
+          drawerIcon: ({ color }) => <Ionicons name="cart-outline" size={22} color={color} />,
+        }}
+      />
+
+      {/* 3. FAVORITOS */}
+      <Drawer.Screen
+        name="favorites"
+        options={{
+          drawerLabel: 'Favoritos',
+          title: 'Mis Favoritos',
+          drawerIcon: ({ color }) => <Ionicons name="heart-outline" size={22} color={color} />,
+        }}
+      />
+
+      {/* 4. PERFIL */}
+      <Drawer.Screen
+        name="profile"
+        options={{
+          drawerLabel: 'Mi Perfil',
+          title: 'Mi Cuenta',
+          drawerIcon: ({ color }) => <Ionicons name="person-outline" size={22} color={color} />,
+        }}
+      />
+
+      {/* 5. PEDIDOS */}
+      <Drawer.Screen
+        name="orders"
+        options={{
+          drawerLabel: 'Mis Pedidos',
+          title: 'Historial',
+          drawerIcon: ({ color }) => <Ionicons name="receipt-outline" size={22} color={color} />,
+        }}
+      />
+
+      {/* 6. CONFIGURACIÓN */}
+      <Drawer.Screen
+        name="settings"
+        options={{
+          drawerLabel: 'Ajustes',
+          title: 'Configuración',
+          drawerIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
+        }}
+      />
     </Drawer>
   );
 }
