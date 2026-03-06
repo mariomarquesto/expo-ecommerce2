@@ -1,12 +1,16 @@
-import { Product } from "../models/product.model.js";
-
+// backend/controllers/product.controller.js
 export const getMobileProducts = async (req, res) => {
-    try {
-        // Traemos solo lo necesario: nombre, precio, stock e imagen
-        const products = await Product.find().select("name price stock image description category");
-        
-        res.status(200).json(products);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener productos para mobile", error: error.message });
+  try {
+    // .find() returns an array of all documents in the collection
+    const products = await Product.find(); 
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
     }
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };

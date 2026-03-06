@@ -1,18 +1,36 @@
-// app/index.tsx
+import React from 'react';
 import { View, Text, FlatList, ActivityIndicator, StyleSheet } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { fetchProducts } from '../services/api';
+import { fetchProducts } from '../services/api'; // Ajusta la ruta a tu archivo api.ts
 
 export default function HomeScreen() {
-  const { data: products, isLoading, error } = useQuery({
+  // 1. Usamos React Query para obtener los productos
+  const { data: products, isLoading, isError, error } = useQuery({
     queryKey: ['products'],
     queryFn: fetchProducts,
   });
 
-  if (isLoading) return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
-  
-  if (error) return <Text style={styles.error}>Error: Asegúrate de que el Backend esté encendido y la IP sea correcta.</Text>;
+  // 2. Estado de carga
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#eb0b0b" />
+        <Text>Cargando productos...</Text>
+      </View>
+    );
+  }
 
+  // 3. Estado de error (IP mal configurada, servidor caído, etc.)
+  if (isError) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Error al conectar con el servidor</Text>
+        <Text style={{ fontSize: 12 }}>{(error as any).message}</Text>
+      </View>
+    );
+  }
+
+  // 4. Renderizado de la lista
   return (
     <View style={styles.container}>
       <FlatList
@@ -20,19 +38,34 @@ export default function HomeScreen() {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.price}>${item.price}</Text>
+            <View style={styles.info}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.price}>${item.price}</Text>
+            </View>
           </View>
         )}
+        ListEmptyComponent={<Text style={styles.empty}>No hay productos aún.</Text>}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#f5f5f5' },
-  card: { backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, elevation: 2 },
+  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 10 },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  card: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 10,
+    elevation: 3, // Sombra para Android
+    shadowColor: '#000', // Sombra para iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+  },
+  info: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   name: { fontSize: 18, fontWeight: 'bold' },
-  price: { color: '#2ecc71', fontSize: 16, marginTop: 5 },
-  error: { color: 'red', textAlign: 'center', marginTop: 20 }
+  price: { fontSize: 16, color: '#eb0b0b', fontWeight: 'bold' },
+  errorText: { color: 'red', fontWeight: 'bold', marginBottom: 5 },
+  empty: { textAlign: 'center', marginTop: 50, color: '#888' }
 });

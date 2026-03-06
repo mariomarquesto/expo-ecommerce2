@@ -1,13 +1,9 @@
-import { Router } from "express";
-import { getMobileProducts } from "../controllers/mobile.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+// routes/mobile.route.js
+import express from "express";
+import { getMobileProducts } from "../controllers/product.controller.js";
 
-const router = Router();
+const router = express.Router();
 
-// RUTA PÚBLICA: Para que la app cargue productos apenas abre
-router.get("/products", getMobileProducts);
-
-// RUTA PRIVADA: Ejemplo para ver el perfil (necesita estar logueado en Clerk)
-// router.get("/profile", protectRoute, getProfile);
+router.get("/products", getMobileProducts); // NO pongas /api/mobile aquí, ya se pone en server.js
 
 export default router;
