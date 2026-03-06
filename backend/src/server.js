@@ -7,6 +7,17 @@ import { clerkMiddleware } from "@clerk/express";
 // --- CONFIGURACIONES LOCALES ---
 import { connectDB } from "./config/db.js";
 
+
+// ... otros imports
+import mobileRouter from "./routes/mobile.route.js";
+
+// ... middlewares
+
+// 3️⃣ RUTAS API
+app.use("/api/mobile", mobileRouter); // <--- ENDPOINT PARA TU EXPO
+
+
+
 // --- IMPORTACIÓN DE RUTAS ---
 import userRouter from "./routes/user.route.js";
 import productRouter from "./routes/product.route.js";
