@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { Product } from "../models/product.model.js";
+import { Customer } from "../models/customer.model.js";
+import { Order } from "../models/order.model.js";
 import { ENV } from "../config/env.js";
 
 const products = [
@@ -10,8 +12,6 @@ const products = [
     stock: 50,
     category: "Electronics",
     images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500"],
-    averageRating: 4.5,
-    totalReviews: 128,
   },
   {
     name: "Smart Watch Series 5",
@@ -20,8 +20,6 @@ const products = [
     stock: 35,
     category: "Electronics",
     images: ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500"],
-    averageRating: 4.7,
-    totalReviews: 256,
   },
   {
     name: "Leather Crossbody Bag",
@@ -30,73 +28,77 @@ const products = [
     stock: 25,
     category: "Fashion",
     images: ["https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500"],
-    averageRating: 4.3,
-    totalReviews: 89,
+  }
+];
+
+const customers = [
+  {
+    name: "Juan Pérez",
+    email: "juan.perez@email.com",
+    phone: "3814556677",
+    address: "Av. Alem 1234, Tucumán"
   },
   {
-    name: "Running Shoes - Pro Edition",
-    description: "Lightweight running shoes with responsive cushioning and breathable mesh upper.",
-    price: 129.99,
-    stock: 60,
-    category: "Sports",
-    images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"],
-    averageRating: 4.6,
-    totalReviews: 342,
-  },
-  {
-    name: "Bestselling Mystery Novel",
-    description: "A gripping psychological thriller that will keep you on the edge of your seat.",
-    price: 24.99,
-    stock: 100,
-    category: "Books",
-    images: ["https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500"],
-    averageRating: 4.8,
-    totalReviews: 1243,
+    name: "Gabriela Gómez",
+    email: "gabi.gomez@email.com",
+    phone: "381998877",
+    address: "Calle Falsa 123"
   }
 ];
 
 const seedDatabase = async () => {
   try {
     console.log("⏳ Intentando conectar a MongoDB Atlas...");
-    
-    // UNA SOLA CONEXIÓN con todos los parámetros de seguridad
-    await mongoose.connect(ENV.MONGO_URI, {
-      serverSelectionTimeoutMS: 30000, 
-      connectTimeoutMS: 30000,
-      family: 4, 
-    });
-
+    await mongoose.connect(ENV.MONGO_URI);
     console.log("✅ Conectado exitosamente a MongoDB");
 
-    // 1. Limpiar base de datos
+    // 1. Limpiar TODA la base de datos
     await Product.deleteMany({});
-    console.log("🗑️  Base de datos limpia (Productos eliminados)");
+    await Customer.deleteMany({});
+    await Order.deleteMany({});
+    console.log("🗑️  Base de datos limpia (Productos, Clientes y Órdenes eliminados)");
 
-    // 2. Insertar nuevos productos
-    await Product.insertMany(products);
-    console.log(`✅ Se han insertado ${products.length} productos con éxito`);
+    // 2. Insertar Productos y Clientes
+    const createdProducts = await Product.insertMany(products);
+    const createdCustomers = await Customer.insertMany(customers);
+    console.log(`✅ ${createdProducts.length} productos y ${createdCustomers.length} clientes insertados`);
 
-    // 3. Resumen
-    const categories = [...new Set(products.map((p) => p.category))];
-    console.log("\n📊 RESUMEN:");
-    console.log(`Total: ${products.length} | Categorías: ${categories.join(", ")}`);
+    // 3. Crear una Orden de prueba vinculada
+    // IMPORTANTE: Ajustado para cumplir con las validaciones de tu Order Model
+    const orderData = {
+      user: createdCustomers[0]._id, // ID del cliente (referencia a User)
+      clerkId: "user_2test_clerk_998877", // Simulación de ID de Clerk
+      orderItems: [
+        {
+          product: createdProducts[0]._id,
+          name: createdProducts[0].name,
+          price: createdProducts[0].price,
+          quantity: 2,
+          image: createdProducts[0].images[0]
+        }
+      ],
+      shippingAddress: {
+        fullName: createdCustomers[0].name,
+        streetAddress: "Av. Alem 1234",
+        city: "San Miguel de Tucumán",
+        state: "Tucumán",
+        zipCode: "4000",
+        phoneNumber: createdCustomers[0].phone
+      },
+      totalPrice: createdProducts[0].price * 2,
+      status: "pending", // Debe ser: pending, shipped o delivered según tu enum
+    };
 
-    // 4. Cerrar y salir
+    await Order.create(orderData);
+    console.log("🛒 Orden de prueba creada con éxito");
+
     await mongoose.connection.close();
     console.log("🔌 Conexión cerrada. Proceso finalizado.");
     process.exit(0);
 
   } catch (error) {
     console.error("\n❌ Error crítico durante el seeding:");
-    console.error("Mensaje:", error.message);
-    
-    if (error.message.includes('ReplicaSetNoPrimary') || error.message.includes('whitelist')) {
-      console.log("\n👉 REVISIÓN DE SEGURIDAD:");
-      console.log("1. Ve a MongoDB Atlas -> Network Access.");
-      console.log("2. Asegúrate de que 0.0.0.0/0 esté en verde (ACTIVE).");
-      console.log("3. Si persiste, prueba conectarte usando los datos móviles de tu celular.");
-    }
-    
+    console.error(error.message);
     process.exit(1);
   }
 };

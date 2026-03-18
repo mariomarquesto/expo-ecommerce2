@@ -1,9 +1,15 @@
 import axiosInstance from "./axios";
 
+// --- PRODUCTOS ---
 export const productApi = {
   getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/products");
-    return data;
+    try {
+      const { data } = await axiosInstance.get("/admin/products");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+      return [];
+    }
   },
 
   create: async (formData) => {
@@ -22,10 +28,16 @@ export const productApi = {
   },
 };
 
+// --- ÓRDENES ---
 export const orderApi = {
   getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/orders");
-    return data;
+    try {
+      const { data } = await axiosInstance.get("/admin/orders");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener órdenes:", error);
+      return [];
+    }
   },
 
   updateStatus: async ({ orderId, status }) => {
@@ -34,16 +46,40 @@ export const orderApi = {
   },
 };
 
+// --- ESTADÍSTICAS ---
 export const statsApi = {
   getDashboard: async () => {
-    const { data } = await axiosInstance.get("/admin/stats");
-    return data;
+    try {
+      // Usamos /admin/stats porque está en admin.route.js
+      const { data } = await axiosInstance.get("/admin/stats");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener estadísticas:", error);
+      return { totalRevenue: 0, totalOrders: 0, totalCustomers: 0, totalProducts: 0 };
+    }
   },
 };
 
+// --- CLIENTES (RUTA FINAL) ---
 export const customerApi = {
   getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/customers");
+    try {
+      // ⚠️ AHORA SÍ LLEVA /admin porque lo registramos en admin.route.js
+      const { data } = await axiosInstance.get("/admin/customers");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+      return []; 
+    }
+  },
+
+  create: async (customerData) => {
+    const { data } = await axiosInstance.post("/admin/customers", customerData);
     return data;
   },
+
+  update: async (id, customerData) => {
+    const { data } = await axiosInstance.put(`/admin/customers/${id}`, customerData);
+    return data;
+  }
 };
