@@ -42,6 +42,19 @@ El ecosistema está diseñado para separar responsabilidades y escalar de forma 
 
 ---
 
+
+### 🚀 Dashboard Admin 
+---
+<img width="1349" height="540" alt="Captura de pantalla 2026-03-18 173950" src="https://github.com/user-attachments/assets/677dd802-3baf-45f8-9ac2-9e1c92756841" />
+
+---
+
+### 🚀 Dashboard Employes
+
+---
+
+<img width="1358" height="597" alt="Captura de pantalla 2026-03-18 173710" src="https://github.com/user-attachments/assets/15743bc5-1b4d-4679-9af3-45ec2f1463ca" />
+
 ## 🚀 Guía de Inicio Rápido
 
 Para levantar todo el ecosistema localmente:
@@ -49,8 +62,10 @@ Para levantar todo el ecosistema localmente:
 ### Paso 1: Variables de Entorno
 Crea archivos `.env` en cada carpeta siguiendo el ejemplo:
 ```env
-# Backend / Admin / Employees
+# Backend / Admin / Employees         
 CLERK_PUBLISHABLE_KEY=pk_test_...
 CLERK_SECRET_KEY=sk_test_...
 MONGO_URI=mongodb+srv://...
 CLOUDINARY_URL=cloudinary://...
+
+
