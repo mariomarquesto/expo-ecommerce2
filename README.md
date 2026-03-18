@@ -1,11 +1,56 @@
-🛒 Full-Stack E-Commerce EcosystemEste proyecto es una solución integral de comercio electrónico que abarca desde la experiencia móvil del cliente hasta la gestión administrativa y operativa.🏗️ Estructura del SistemaEl ecosistema se divide en 4 módulos principales:MóduloTecnología PrincipalRol📱 MobileReact Native + ExpoApp para el cliente final (UX fluida).⚙️ BackendNode.js + MongooseAPI central, gestión de Cloudinary y webhooks de Svix.🔐 AdminReact 19 + ViteDashboard estratégico y control de usuarios.👥 EmployeesReact 19 + ViteGestión operativa de stock y pedidos.🛠️ Stack Tecnológico DetalladoBackend (El Corazón)Base de Datos: MongoDB con Mongoose.Autenticación: Clerk para Express.Archivos: Cloudinary (manejo de imágenes de productos).Seguridad: Middleware de Clerk y validación de Webhooks con Svix.Frontend Web (Admin & Employees)Framework: React 19 + Vite (Rendimiento ultra rápido).UI: Tailwind CSS + DaisyUI (Diseño moderno y consistente).Manejo de Datos: TanStack Query para fetching y caché.Monitoreo: Sentry integrado para reporte de errores.App MóvilCore: Expo (SDK 54) + Expo Router.Estado: Zustand (Ligero y potente para el carrito).Navegación: React Navigation (Tabs y Drawer).Iconos: Lucide & Vector Icons.🚦 Flujo de TrabajoRegistro/Login: Gestionado por Clerk en todas las plataformas.Carga de Productos: El Admin sube imágenes (vía Cloudinary) y datos al Backend.Compra: El Usuario navega en la App Móvil, agrega al carrito (Zustand) y realiza el pedido.Gestión: Los Empleados reciben la notificación en su dashboard y actualizan el estado del pedido.📦 Scripts de Inicio RápidoPara levantar el entorno de desarrollo:Bash# 1. Backend
-cd backend && npm run dev
+# 🚀 E-Commerce Full-Stack Ecosystem
 
-# 2. Admin Dashboard
-cd admin && npm run dev
+Este proyecto es una solución integral de comercio electrónico que conecta una **App Móvil nativa** con un potente **Core Backend** y dos **Paneles de Control Web** especializados.
 
-# 3. Employee Dashboard
-cd employees && npm run dev
+---
 
-# 4. Mobile App
-cd mobile && npx expo start
+## 🛠️ Stack Tecnológico
+
+| **Componente** | **Tecnologías Clave** | **Estado** |
+| :--- | :--- | :--- |
+| **📱 Mobile App** | ![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![Expo](https://img.shields.io/badge/Expo-000020?style=flat-square&logo=expo&logoColor=white) ![Zustand](https://img.shields.io/badge/Zustand-443E38?style=flat-square) | `Functional` |
+| **⚙️ Backend API** | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) ![Clerk](https://img.shields.io/badge/Clerk-6C47FF?style=flat-square&logo=clerk&logoColor=white) | `Active` |
+| **🔐 Admin Web** | ![React 19](https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB) ![Tailwind](https://img.shields.io/badge/Tailwind_4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white) | `Development` |
+| **👥 Employees** | ![DaisyUI](https://img.shields.io/badge/DaisyUI-553C7B?style=flat-square&logo=daisyui&logoColor=white) ![TanStack](https://img.shields.io/badge/TanStack_Query-FF4154?style=flat-square&logo=react-query&logoColor=white) | `Development` |
+
+---
+
+## 🏗️ Arquitectura del Sistema
+
+El ecosistema está diseñado para separar responsabilidades y escalar de forma independiente:
+
+### 1. Mobile (Cliente Final)
+* **Auth:** Login social y biométrico con **Clerk**.
+* **Store Management:** Carrito de compras reactivo con **Zustand**.
+* **UX:** Navegación fluida con **Expo Router** y animaciones de **Reanimated**.
+
+### 2. Backend (El Cerebro)
+* **DB:** Persistencia de datos en **MongoDB Atlas**.
+* **Media:** Procesamiento de imágenes con **Multer** y hosting en **Cloudinary**.
+* **Webhooks:** Sincronización de eventos de usuario mediante **Svix**.
+
+### 3. Dashboards (Gestión)
+* **Admin:** Visión 360° del negocio, gestión de roles y analíticas.
+* **Employee:** Foco en la logística, stock y actualización de estados de pedidos.
+
+---
+
+## 🔐 Configuración de Seguridad
+
+> [!IMPORTANT]
+> El proyecto utiliza **Clerk** para el manejo de sesiones. Asegúrate de configurar los Webhooks en el Dashboard de Clerk apuntando a la ruta `/api/webhooks` del backend para mantener la sincronización de usuarios.
+
+---
+
+## 🚀 Guía de Inicio Rápido
+
+Para levantar todo el ecosistema localmente:
+
+### Paso 1: Variables de Entorno
+Crea archivos `.env` en cada carpeta siguiendo el ejemplo:
+```env
+# Backend / Admin / Employees
+CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+MONGO_URI=mongodb+srv://...
+CLOUDINARY_URL=cloudinary://...
