@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/clerk-react";
-import { useLocation } from "react-router-dom"; // Cambiado de "react-router" a "react-router-dom"
+import { useLocation } from "react-router-dom";
 
 import {
   PanelLeft,
@@ -7,15 +7,37 @@ import {
   CheckSquare,
   Clock,
   UserCircle,
-  Bell
+  Bell,
+  Users, // <--- ¡IMPORTANTE! Agregado aquí
 } from "lucide-react";
 
 // eslint-disable-next-line
 export const NAVIGATION = [
-  { name: "Inicio", path: "/dashboard", icon: <LayoutDashboard className="size-5" /> },
-  { name: "Mis Tareas", path: "/tasks", icon: <CheckSquare className="size-5" /> },
-  { name: "Asistencia", path: "/attendance", icon: <Clock className="size-5" /> },
-  { name: "Mi Perfil", path: "/profile", icon: <UserCircle className="size-5" /> },
+  {
+    name: "Inicio",
+    path: "/dashboard",
+    icon: <LayoutDashboard className="size-5" />,
+  },
+  {
+    name: "Mis Tareas",
+    path: "/tasks",
+    icon: <CheckSquare className="size-5" />,
+  },
+  { 
+    name: "Clientes", 
+    path: "/customers", 
+    icon: <Users className="size-5" /> // Ahora sí va a funcionar
+  },
+  {
+    name: "Asistencia",
+    path: "/attendance",
+    icon: <Clock className="size-5" />,
+  },
+  {
+    name: "Mi Perfil",
+    path: "/profile",
+    icon: <UserCircle className="size-5" />,
+  },
 ];
 
 function Navbar() {
@@ -39,7 +61,9 @@ function Navbar() {
 
         <div>
           <h1 className="text-xl font-bold tracking-tight">{currentPage}</h1>
-          <p className="text-xs text-base-content/60 italic">Portal del Empleado</p>
+          <p className="text-xs text-base-content/60 italic">
+            Portal del Empleado
+          </p>
         </div>
       </div>
 

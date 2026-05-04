@@ -12,7 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import MyTasksPage from "./pages/MyTasksPage";
 import AttendancePage from "./pages/AttendancePage";
-
+import CustomerPage from "./pages/CustomersPage"
 function App() {
   const { isSignedIn, isLoaded } = useAuth();
 
@@ -39,7 +39,7 @@ function App() {
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="tasks" element={<MyTasksPage />} />
         <Route path="attendance" element={<AttendancePage />} />
-        
+        <Route path="customers" element={<CustomerPage/>}/>
         {/* Perfil (puedes dejarlo como placeholder o crear la página luego) */}
         <Route path="profile" element={<div className="p-10 font-bold">Mi Perfil (En construcción)</div>} />
       </Route>
