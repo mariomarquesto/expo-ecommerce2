@@ -1,7 +1,10 @@
+// admin/src/components/ProductCard.jsx
 import { PencilIcon, Trash2Icon, EyeIcon } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 
-export default function ProductCard({ product, onEdit, onDelete, onView }) {
+export default function ProductCard({ product, onDelete, onView }) {
+  const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
   
   const getStockStatus = (stock) => {
@@ -43,17 +46,25 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
     ? product.price * (1 - product.discount / 100) 
     : product.price;
 
+  const handleEdit = () => {
+    navigate(`/products/edit/${product._id}`);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
+      onDelete(product._id);
+    }
+  };
+
   return (
     <div className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border border-slate-200 overflow-hidden">
       <div className="relative">
-        {/* Badge de descuento flotante */}
         {hasDiscount && (
           <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold">
             -{product.discount}%
           </div>
         )}
         
-        {/* Imagen con hover effect */}
         <div className="relative h-48 overflow-hidden bg-linear-to-br from-slate-100 to-slate-200">
           <img 
             src={imageError ? "https://via.placeholder.com/400x300?text=Sin+Imagen" : (product.images?.[0] || "https://via.placeholder.com/400x300?text=Producto")}
@@ -62,7 +73,6 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
             onError={() => setImageError(true)}
           />
           
-          {/* Overlay con botón de vista rápida */}
           {onView && (
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
               <button 
@@ -78,25 +88,21 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
       </div>
       
       <div className="p-4">
-        {/* Categoría */}
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2 py-1 rounded">
             {product.category || "Sin categoría"}
           </span>
           
-          {/* Badge de stock */}
           <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 ${status.class}`}>
             <span>{status.icon}</span>
             <span>{status.text}</span>
           </div>
         </div>
         
-        {/* Nombre del producto */}
         <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-2 min-h-14">
           {product.name}
         </h3>
         
-        {/* Precio y stock */}
         <div className="flex items-baseline justify-between mb-3">
           <div>
             {hasDiscount ? (
@@ -123,7 +129,6 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
           </div>
         </div>
         
-        {/* Barra de progreso de stock */}
         <div className="mb-4">
           <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
             <div 
@@ -137,18 +142,17 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
           </div>
         </div>
         
-        {/* Botones de acción */}
         <div className="flex gap-2 pt-2 border-t border-slate-100">
           <button 
-            className="flex-1 btn btn-sm bg-slate-100 border-slate-200 hover:bg-blue-500 hover:text-white text-slate-600 transition-all duration-200 rounded-lg py-2 flex items-center justify-center gap-2"
-            onClick={() => onEdit(product)}
+            className="flex-1 bg-slate-100 hover:bg-blue-500 hover:text-white text-slate-600 transition-all duration-200 rounded-lg py-2 flex items-center justify-center gap-2"
+            onClick={handleEdit}
           >
             <PencilIcon className="w-4 h-4" />
             Editar
           </button>
           <button 
-            className="flex-1 btn btn-sm bg-red-50 border-red-100 hover:bg-red-500 hover:text-white text-red-600 transition-all duration-200 rounded-lg py-2 flex items-center justify-center gap-2"
-            onClick={() => onDelete(product._id)}
+            className="flex-1 bg-red-50 hover:bg-red-500 hover:text-white text-red-600 transition-all duration-200 rounded-lg py-2 flex items-center justify-center gap-2"
+            onClick={handleDelete}
           >
             <Trash2Icon className="w-4 h-4" />
             Eliminar

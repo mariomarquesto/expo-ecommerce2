@@ -3,10 +3,11 @@ import LoginPage from "./pages/LoginPage";
 import { useAuth } from "@clerk/clerk-react";
 import DashboardPage from "./pages/DashboardPage";
 import ProductsPage from "./pages/ProductsPage";
+import NewProductPage from "./pages/NewProductPage"; // ← Importar
+import EditProductPage from "./pages/EditProductPage";
 import OrdersPage from "./pages/OrdersPage";
 import CustomersPage from "./pages/CustomersPage";
 import DashboardLayout from "./layouts/DashboardLayout";
-
 import PageLoader from "./components/PageLoader";
 
 function App() {
@@ -22,6 +23,8 @@ function App() {
         <Route index element={<Navigate to={"dashboard"} />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="products/new" element={<NewProductPage />} /> {/* ← Ruta para nuevo producto */}
+        <Route path="products/edit/:id" element={<EditProductPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="customers" element={<CustomersPage />} />
       </Route>
