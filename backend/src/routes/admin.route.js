@@ -1,10 +1,13 @@
 import { Router } from "express";
 import { 
-  getAllProducts, 
+  getAllProducts,
+  createProduct,    // ✅ AGREGAR
+  updateProduct,    // ✅ AGREGAR
+  deleteProduct,    // ✅ AGREGAR
   getAllOrders, 
-  getDashboardStats, // 👈 Ajustado al nombre de tu controlador
+  getDashboardStats,
   updateOrderStatus,
-  getAllCustomers   // 👈 Agregamos la función que faltaba
+  getAllCustomers
 } from "../controllers/admin.controller.js";
 import { protectRoute, adminOnly } from "../middleware/auth.middleware.js";
 
@@ -16,16 +19,18 @@ router.use(adminOnly);
 
 // 1. PRODUCTOS
 router.get("/products", getAllProducts);
+router.post("/products", createProduct);      // ✅ AGREGAR
+router.put("/products/:id", updateProduct);   // ✅ AGREGAR
+router.delete("/products/:id", deleteProduct); // ✅ AGREGAR
 
 // 2. ÓRDENES
 router.get("/orders", getAllOrders);
 router.patch("/orders/:orderId/status", updateOrderStatus);
 
 // 3. ESTADÍSTICAS
-// Nota: En tu controller se llama getDashboardStats, lo vinculamos aquí:
 router.get("/stats", getDashboardStats);
 
-// 4. CLIENTES (La pieza que faltaba para el 404)
-router.get("/customers", getAllCustomers); 
+// 4. CLIENTES
+router.get("/customers", getAllCustomers);
 
 export default router;

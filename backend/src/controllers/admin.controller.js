@@ -5,12 +5,10 @@ import { User } from "../models/user.model.js";
 
 /**
  * Función auxiliar para extraer el public_id de Cloudinary.
- * Maneja URLs con o sin carpetas de forma segura.
  */
 const getPublicId = (url) => {
   if (!url) return null;
   const parts = url.split("/");
-  // Obtenemos "products/nombre_imagen" eliminando la extensión
   const folder = parts[parts.length - 2];
   const fileName = parts[parts.length - 1].split(".")[0];
   return `${folder}/${fileName}`;
@@ -20,22 +18,29 @@ const getPublicId = (url) => {
 
 export async function createProduct(req, res) {
   try {
-    const { name, description, price, stock, category } = req.body;
+    let { name, description, price, stock, category, images } = req.body;
 
     if (!name || !description || !price || !stock || !category) {
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
 
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "Se requiere al menos una imagen" });
-    }
+    let imageUrls = [];
 
-    // Subida paralela a Cloudinary
-    const uploadPromises = req.files.map((file) =>
-      cloudinary.uploader.upload(file.path, { folder: "products" })
-    );
-    const uploadResults = await Promise.all(uploadPromises);
-    const imageUrls = uploadResults.map((result) => result.secure_url);
+    if (images) {
+      if (typeof images === 'string') {
+        imageUrls = [images];
+      } else if (Array.isArray(images)) {
+        imageUrls = images;
+      }
+    } else if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map((file) =>
+        cloudinary.uploader.upload(file.path, { folder: "products" })
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      imageUrls = uploadResults.map((result) => result.secure_url);
+    } else {
+      return res.status(400).json({ message: "Se requiere al menos una imagen o URL de imagen" });
+    }
 
     const product = await Product.create({
       name,
@@ -46,7 +51,10 @@ export async function createProduct(req, res) {
       images: imageUrls,
     });
 
-    res.status(201).json(product);
+    res.status(201).json({
+      success: true,
+      product
+    });
   } catch (error) {
     console.error("Error al crear producto:", error);
     res.status(500).json({ message: "Error interno al crear producto" });
@@ -68,9 +76,18 @@ export async function updateProduct(req, res) {
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: "Producto no encontrado" });
 
-    // Actualizar imágenes si vienen archivos nuevos
-    if (req.files && req.files.length > 0) {
-      // 1. Borrar imágenes anteriores de Cloudinary
+    const { name, description, price, stock, category, images } = req.body;
+
+    // Actualizar imágenes si vienen URLs
+    if (images) {
+      if (typeof images === 'string') {
+        product.images = [images];
+      } else if (Array.isArray(images)) {
+        product.images = images;
+      }
+    }
+    // Actualizar imágenes si vienen archivos
+    else if (req.files && req.files.length > 0) {
       if (product.images && product.images.length > 0) {
         const deletePromises = product.images.map((url) =>
           cloudinary.uploader.destroy(getPublicId(url))
@@ -78,7 +95,6 @@ export async function updateProduct(req, res) {
         await Promise.all(deletePromises);
       }
 
-      // 2. Subir las nuevas
       const uploadPromises = req.files.map((file) =>
         cloudinary.uploader.upload(file.path, { folder: "products" })
       );
@@ -86,18 +102,18 @@ export async function updateProduct(req, res) {
       product.images = uploadResults.map((result) => result.secure_url);
     }
 
-    // Actualizar el resto de campos si existen en el body
-    const fieldsToUpdate = ["name", "description", "category", "price", "stock"];
-    fieldsToUpdate.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        if (field === "price") product[field] = parseFloat(req.body[field]);
-        else if (field === "stock") product[field] = parseInt(req.body[field]);
-        else product[field] = req.body[field];
-      }
-    });
+    // Actualizar otros campos
+    if (name) product.name = name;
+    if (description) product.description = description;
+    if (price) product.price = parseFloat(price);
+    if (stock !== undefined) product.stock = parseInt(stock);
+    if (category) product.category = category;
 
     await product.save();
-    res.status(200).json(product);
+    res.status(200).json({
+      success: true,
+      product
+    });
   } catch (error) {
     console.error("Error al actualizar:", error);
     res.status(500).json({ message: "Error al actualizar producto" });
@@ -110,7 +126,6 @@ export async function deleteProduct(req, res) {
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: "Producto no encontrado" });
 
-    // Limpiar Cloudinary
     if (product.images && product.images.length > 0) {
       const deletePromises = product.images.map((url) =>
         cloudinary.uploader.destroy(getPublicId(url))
