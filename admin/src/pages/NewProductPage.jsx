@@ -89,7 +89,7 @@ export default function NewProductPage() {
         {/* Formulario */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-8 py-6">
+          <div className=" from-emerald-600 to-emerald-700 px-8 py-6">
             <div className="flex items-center gap-3">
               <div className="bg-white/20 p-2 rounded-xl">
                 <PlusIcon className="w-6 h-6 text-white" />

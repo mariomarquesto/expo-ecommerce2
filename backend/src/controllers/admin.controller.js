@@ -208,3 +208,58 @@ export async function getDashboardStats(_, res) {
     res.status(500).json({ message: "Error al obtener estadísticas" });
   }
 }
+
+
+
+// ✅ AGREGAR esta función para crear órdenes manualmente
+export async function createOrder(req, res) {
+  try {
+    const { user, clerkId, orderItems, shippingAddress, totalPrice, status } = req.body;
+
+    // Validar campos obligatorios
+    if (!user || !orderItems || !shippingAddress || !totalPrice) {
+      return res.status(400).json({ 
+        message: "Faltan campos obligatorios: user, orderItems, shippingAddress, totalPrice" 
+      });
+    }
+
+    if (!orderItems.length) {
+      return res.status(400).json({ message: "La orden debe tener al menos un producto" });
+    }
+
+    // Crear la orden
+    const order = await Order.create({
+      user,
+      clerkId: clerkId || "admin_manual",
+      orderItems,
+      shippingAddress,
+      totalPrice,
+      status: status || "pending",
+      paymentMethod: "admin_manual",
+      paymentResult: {
+        id: "admin_created_" + Date.now(),
+        status: "completed",
+        update_time: new Date().toISOString(),
+        email_address: shippingAddress.email || "admin@ecommerce.com"
+      }
+    });
+
+    // Actualizar stock de productos
+    for (const item of orderItems) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: -item.quantity }
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      order
+    });
+  } catch (error) {
+    console.error("Error al crear orden:", error);
+    res.status(500).json({ 
+      message: "Error al crear orden", 
+      error: error.message 
+    });
+  }
+}

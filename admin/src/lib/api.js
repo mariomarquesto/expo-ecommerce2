@@ -5,7 +5,7 @@ import axiosInstance from "./axios";
 export const productApi = {
   getAll: async () => {
     try {
-      const { data } = await axiosInstance.get("api/admin/products"); // ✅
+      const { data } = await axiosInstance.get("/api/admin/products");
       return data;
     } catch (error) {
       console.error("Error al obtener productos:", error);
@@ -14,17 +14,17 @@ export const productApi = {
   },
 
   create: async (formData) => {
-    const { data } = await axiosInstance.post("api/admin/products", formData);
+    const { data } = await axiosInstance.post("/api/admin/products", formData);
     return data;
   },
 
   update: async ({ id, formData }) => {
-    const { data } = await axiosInstance.put(`api/admin/products/${id}`, formData);
+    const { data } = await axiosInstance.put(`/api/admin/products/${id}`, formData);
     return data;
   },
 
   delete: async (productId) => {
-    const { data } = await axiosInstance.delete(`api/admin/products/${productId}`);
+    const { data } = await axiosInstance.delete(`/api/admin/products/${productId}`);
     return data;
   },
 };
@@ -33,7 +33,7 @@ export const productApi = {
 export const orderApi = {
   getAll: async () => {
     try {
-      const { data } = await axiosInstance.get("/orders");
+      const { data } = await axiosInstance.get("/api/admin/orders");
       return data;
     } catch (error) {
       console.error("Error al obtener órdenes:", error);
@@ -41,8 +41,14 @@ export const orderApi = {
     }
   },
 
+  // ✅ AGREGAR función create (faltaba)
+  create: async (orderData) => {
+    const { data } = await axiosInstance.post("/api/admin/orders", orderData);
+    return data;
+  },
+
   updateStatus: async ({ orderId, status }) => {
-    const { data } = await axiosInstance.patch(`/orders/${orderId}/status`, { status });
+    const { data } = await axiosInstance.patch(`/api/admin/orders/${orderId}/status`, { status });
     return data;
   },
 };
@@ -51,7 +57,7 @@ export const orderApi = {
 export const statsApi = {
   getDashboard: async () => {
     try {
-      const { data } = await axiosInstance.get("/stats");
+      const { data } = await axiosInstance.get("/api/admin/stats");
       return data;
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
@@ -64,7 +70,7 @@ export const statsApi = {
 export const customerApi = {
   getAll: async () => {
     try {
-      const { data } = await axiosInstance.get("/customers");
+      const { data } = await axiosInstance.get("/api/admin/customers");
       return data;
     } catch (error) {
       console.error("Error al obtener clientes:", error);
@@ -73,12 +79,12 @@ export const customerApi = {
   },
 
   create: async (customerData) => {
-    const { data } = await axiosInstance.post("/customers", customerData);
+    const { data } = await axiosInstance.post("/api/admin/customers", customerData);
     return data;
   },
 
   update: async (id, customerData) => {
-    const { data } = await axiosInstance.put(`/customers/${id}`, customerData);
+    const { data } = await axiosInstance.put(`/api/admin/customers/${id}`, customerData);
     return data;
   }
 };

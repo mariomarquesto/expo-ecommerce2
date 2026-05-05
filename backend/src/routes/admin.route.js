@@ -7,7 +7,8 @@ import {
   getAllOrders, 
   getDashboardStats,
   updateOrderStatus,
-  getAllCustomers
+  getAllCustomers,
+  createOrder,
 } from "../controllers/admin.controller.js";
 import { protectRoute, adminOnly } from "../middleware/auth.middleware.js";
 
@@ -25,6 +26,7 @@ router.delete("/products/:id", deleteProduct); // ✅ AGREGAR
 
 // 2. ÓRDENES
 router.get("/orders", getAllOrders);
+router.post("/orders", createOrder);
 router.patch("/orders/:orderId/status", updateOrderStatus);
 
 // 3. ESTADÍSTICAS

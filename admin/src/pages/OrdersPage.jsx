@@ -1,9 +1,12 @@
+// admin/src/pages/OrdersPage.jsx
 import { orderApi } from "../lib/api";
 import { formatDate } from "../lib/utils";
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { PlusIcon } from "lucide-react";
 
 function OrdersPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: ordersData, isLoading } = useQuery({
@@ -26,39 +29,53 @@ function OrdersPage() {
   const orders = ordersData?.orders || [];
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold">Orders</h1>
-        <p className="text-base-content/70">Manage customer orders</p>
+    <div className="space-y-6 p-6">
+      {/* HEADER con botón */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Órdenes</h1>
+          <p className="text-gray-600">Gestiona las órdenes de los clientes</p>
+        </div>
+        <button
+          onClick={() => navigate("/orders/new")}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-sm"
+        >
+          <PlusIcon className="w-5 h-5" />
+          Nueva Orden
+        </button>
       </div>
 
       {/* ORDERS TABLE */}
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-6">
           {isLoading ? (
             <div className="flex justify-center py-12">
-              <span className="loading loading-spinner loading-lg" />
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
             </div>
           ) : orders.length === 0 ? (
-            <div className="text-center py-12 text-base-content/60">
-              <p className="text-xl font-semibold mb-2">No orders yet</p>
-              <p className="text-sm">Orders will appear here once customers make purchases</p>
+            <div className="text-center py-12 text-gray-500">
+              <p className="text-xl font-semibold mb-2">No hay órdenes aún</p>
+              <p className="text-sm">Las órdenes aparecerán aquí cuando los clientes realicen compras</p>
+              <button
+                onClick={() => navigate("/orders/new")}
+                className="mt-4 text-emerald-600 hover:text-emerald-700 font-medium"
+              >
+                Crear primera orden →
+              </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="table">
+              <table className="w-full">
                 <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Date</th>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Cliente</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Items</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Total</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Estado</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Fecha</th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {orders.map((order) => {
                     const totalQuantity = order.orderItems.reduce(
@@ -67,45 +84,46 @@ function OrdersPage() {
                     );
 
                     return (
-                      <tr key={order._id}>
-                        <td>
-                          <span className="font-medium">#{order._id.slice(-8).toUpperCase()}</span>
+                      <tr key={order._id} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-3 px-4">
+                          <span className="font-mono text-sm text-gray-700">
+                            #{order._id.slice(-8).toUpperCase()}
+                          </span>
                         </td>
-
-                        <td>
-                          <div className="font-medium">{order.shippingAddress.fullName}</div>
-                          <div className="text-sm opacity-60">
-                            {order.shippingAddress.city}, {order.shippingAddress.state}
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-gray-900">
+                            {order.shippingAddress?.fullName || "N/A"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {order.shippingAddress?.city}, {order.shippingAddress?.state}
                           </div>
                         </td>
-
-                        <td>
-                          <div className="font-medium">{totalQuantity} items</div>
-                          <div className="text-sm opacity-60">
+                        <td className="py-3 px-4">
+                          <div className="font-medium text-gray-900">{totalQuantity} items</div>
+                          <div className="text-sm text-gray-500">
                             {order.orderItems[0]?.name}
-                            {order.orderItems.length > 1 && ` +${order.orderItems.length - 1} more`}
+                            {order.orderItems.length > 1 && ` +${order.orderItems.length - 1} más`}
                           </div>
                         </td>
-
-                        <td>
-                          <span className="font-semibold">${order.totalPrice.toFixed(2)}</span>
+                        <td className="py-3 px-4">
+                          <span className="font-semibold text-gray-900">
+                            ${order.totalPrice?.toFixed(2) || "0"}
+                          </span>
                         </td>
-
-                        <td>
+                        <td className="py-3 px-4">
                           <select
                             value={order.status}
                             onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                            className="select select-sm"
+                            className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 bg-white"
                             disabled={updateStatusMutation.isPending}
                           >
-                            <option value="pending">Pending</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
+                            <option value="pending">Pendiente</option>
+                            <option value="shipped">Enviado</option>
+                            <option value="delivered">Entregado</option>
                           </select>
                         </td>
-
-                        <td>
-                          <span className="text-sm opacity-60">{formatDate(order.createdAt)}</span>
+                        <td className="py-3 px-4 text-sm text-gray-600">
+                          {formatDate(order.createdAt)}
                         </td>
                       </tr>
                     );
@@ -119,4 +137,5 @@ function OrdersPage() {
     </div>
   );
 }
+
 export default OrdersPage;

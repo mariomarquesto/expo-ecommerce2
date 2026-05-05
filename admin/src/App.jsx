@@ -9,6 +9,9 @@ import OrdersPage from "./pages/OrdersPage";
 import CustomersPage from "./pages/CustomersPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PageLoader from "./components/PageLoader";
+import CreateOrderPage from "./pages/CreateOrderPage";
+
+
 
 function App() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -27,6 +30,7 @@ function App() {
         <Route path="products/edit/:id" element={<EditProductPage />} />
         <Route path="orders" element={<OrdersPage />} />
         <Route path="customers" element={<CustomersPage />} />
+        <Route path="orders/new" element={<CreateOrderPage />} />
       </Route>
     </Routes>
   );
