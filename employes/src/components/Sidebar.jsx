@@ -1,10 +1,10 @@
+// employes/src/components/Sidebar.jsx
 import { NavLink } from "react-router-dom";
-import { NAVIGATION } from "./Navbar";
+import { NAVIGATION } from "../constants/navigation";
 
 function Sidebar() {
   return (
     <ul className="menu p-4 w-80 min-h-full bg-neutral-900 text-white">
-      {/* Título o Logo del Dashboard */}
       <li className="menu-title text-gray-400 text-lg mb-4">Empleado Panel</li>
       
       {NAVIGATION.map((item) => (
@@ -13,7 +13,7 @@ function Sidebar() {
             to={item.path}
             className={({ isActive }) => 
               `flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                isActive ? "bg-primary text-white" : "hover:bg-gray-800"
+                isActive ? "bg-emerald-600 text-white" : "hover:bg-gray-800"
               }`
             }
           >

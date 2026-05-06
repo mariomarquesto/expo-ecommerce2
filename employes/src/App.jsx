@@ -12,6 +12,8 @@ import MyTasksPage from "./pages/MyTasksPage";
 import AttendancePage from "./pages/AttendancePage";
 import CustomersPage from "./pages/CustomersPage";
 import ProductsPage from "./pages/ProductsPage";
+import SalesPage from "./pages/SalesPage";           // ← Agregar
+import CreateSalePage from "./pages/CreateSalePage"; // ← Agregar
 
 function App() {
   // Inicializar estado directamente desde localStorage
@@ -51,11 +53,18 @@ function App() {
         element={isAuthenticated ? <DashboardLayout onLogout={handleLogout} employee={employee} /> : <Navigate to="/login" />}
       >
         <Route index element={<Navigate to="dashboard" />} />
+        
+        {/* Rutas existentes */}
         <Route path="dashboard" element={<DashboardPage employee={employee} />} />
         <Route path="tasks" element={<MyTasksPage employee={employee} />} />
         <Route path="attendance" element={<AttendancePage employee={employee} />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="products" element={<ProductsPage />} />
+        
+        {/* Nuevas rutas para Ventas */}
+        <Route path="/sales" element={<SalesPage />} />
+        <Route path="/sales/new" element={<CreateSalePage />} />
+        
         <Route path="profile" element={<div className="p-10 font-bold text-gray-900">Mi Perfil - {employee?.name}</div>} />
       </Route>
 

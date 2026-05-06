@@ -1,9 +1,20 @@
 // employes/src/layouts/DashboardLayout.jsx
-import { Outlet, useNavigate } from "react-router-dom";
-import { LogOutIcon, UserIcon } from "lucide-react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { LogOutIcon, UserIcon, LayoutDashboard, CheckSquare, Package, Users, ShoppingBag, Clock, UserCircle } from "lucide-react";
 
 function DashboardLayout({ onLogout, employee }) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const NAVIGATION = [
+    { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
+    { name: "Mis Tareas", path: "/tasks", icon: <CheckSquare className="w-5 h-5" /> },
+    { name: "Asistencia", path: "/attendance", icon: <Clock className="w-5 h-5" /> },
+    { name: "Clientes", path: "/customers", icon: <Users className="w-5 h-5" /> },
+    { name: "Productos", path: "/products", icon: <Package className="w-5 h-5" /> },
+    { name: "Ventas", path: "/sales", icon: <ShoppingBag className="w-5 h-5" /> },
+    { name: "Mi Perfil", path: "/profile", icon: <UserCircle className="w-5 h-5" /> },
+  ];
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -15,24 +26,20 @@ function DashboardLayout({ onLogout, employee }) {
         </div>
         
         <nav className="p-4 space-y-1">
-          <button onClick={() => navigate("/dashboard")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            📊 Dashboard
-          </button>
-          <button onClick={() => navigate("/tasks")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            ✅ Mis Tareas
-          </button>
-          <button onClick={() => navigate("/attendance")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            📅 Asistencia
-          </button>
-          <button onClick={() => navigate("/customers")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            👥 Clientes
-          </button>
-          <button onClick={() => navigate("/products")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            📦 Productos
-          </button>
-          <button onClick={() => navigate("/profile")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
-            👤 Mi Perfil
-          </button>
+          {NAVIGATION.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => navigate(item.path)}
+              className={`w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
+                location.pathname === item.path
+                  ? "bg-emerald-50 text-emerald-600"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              }`}
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </button>
+          ))}
         </nav>
         
         <div className="absolute bottom-0 w-64 p-4 border-t border-gray-200">
