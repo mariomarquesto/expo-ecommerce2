@@ -23,6 +23,12 @@ export const NAVIGATION = [
     path: "/tasks",
     icon: <CheckSquare className="size-5" />,
   },
+
+   {
+    name: "Productos",
+    path: "/products",
+    icon: <CheckSquare className="size-5" />,
+  },
   { 
     name: "Clientes", 
     path: "/customers", 

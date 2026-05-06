@@ -41,7 +41,16 @@ export const orderApi = {
     }
   },
 
-  // ✅ AGREGAR función create (faltaba)
+  getById: async (orderId) => {
+    try {
+      const { data } = await axiosInstance.get(`/api/admin/orders/${orderId}`);
+      return data;
+    } catch (error) {
+      console.error("Error al obtener orden:", error);
+      return null;
+    }
+  },
+
   create: async (orderData) => {
     const { data } = await axiosInstance.post("/api/admin/orders", orderData);
     return data;
@@ -49,6 +58,11 @@ export const orderApi = {
 
   updateStatus: async ({ orderId, status }) => {
     const { data } = await axiosInstance.patch(`/api/admin/orders/${orderId}/status`, { status });
+    return data;
+  },
+
+  delete: async (orderId) => {
+    const { data } = await axiosInstance.delete(`/api/admin/orders/${orderId}`);
     return data;
   },
 };
@@ -70,7 +84,7 @@ export const statsApi = {
 export const customerApi = {
   getAll: async () => {
     try {
-      const { data } = await axiosInstance.get("/api/admin/customers");
+      const { data } = await axiosInstance.get("/api/customers");
       return data;
     } catch (error) {
       console.error("Error al obtener clientes:", error);
@@ -79,12 +93,12 @@ export const customerApi = {
   },
 
   create: async (customerData) => {
-    const { data } = await axiosInstance.post("/api/admin/customers", customerData);
+    const { data } = await axiosInstance.post("/api/customers", customerData);
     return data;
   },
 
   update: async (id, customerData) => {
-    const { data } = await axiosInstance.put(`/api/admin/customers/${id}`, customerData);
+    const { data } = await axiosInstance.put(`/api/customers/${id}`, customerData);
     return data;
   }
 };

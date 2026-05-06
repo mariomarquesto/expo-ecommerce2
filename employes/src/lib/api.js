@@ -1,49 +1,83 @@
+// employes/src/lib/api.js
 import axiosInstance from "./axios";
 
-export const productApi = {
-  getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/products");
-    return data;
-  },
+// URL base del backend
+const API_URL = "http://localhost:3000/api";
 
-  create: async (formData) => {
-    const { data } = await axiosInstance.post("/admin/products", formData);
-    return data;
-  },
-
-  update: async ({ id, formData }) => {
-    const { data } = await axiosInstance.put(`/admin/products/${id}`, formData);
-    return data;
-  },
-
-  delete: async (productId) => {
-    const { data } = await axiosInstance.delete(`/admin/products/${productId}`);
-    return data;
-  },
-};
-
-export const orderApi = {
-  getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/orders");
-    return data;
-  },
-
-  updateStatus: async ({ orderId, status }) => {
-    const { data } = await axiosInstance.patch(`/admin/orders/${orderId}/status`, { status });
-    return data;
-  },
-};
-
+// --- ESTADÍSTICAS (usar las mismas que admin) ---
 export const statsApi = {
   getDashboard: async () => {
-    const { data } = await axiosInstance.get("/admin/stats");
-    return data;
+    try {
+      const { data } = await axiosInstance.get("/api/admin/stats");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener estadísticas:", error);
+      return { totalRevenue: 0, totalOrders: 0, totalCustomers: 0, totalProducts: 0 };
+    }
   },
 };
 
+// --- ÓRDENES (usar las mismas que admin) ---
+export const orderApi = {
+  getAll: async () => {
+    try {
+      const { data } = await axiosInstance.get("/api/admin/orders");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener órdenes:", error);
+      return [];
+    }
+  },
+};
+
+// --- PRODUCTOS (usar las mismas que admin) ---
+export const productApi = {
+  getAll: async () => {
+    try {
+      const { data } = await axiosInstance.get("/api/admin/products");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+      return [];
+    }
+  },
+};
+
+// --- CLIENTES (usar /api/customers) ---
 export const customerApi = {
   getAll: async () => {
-    const { data } = await axiosInstance.get("/admin/customers");
-    return data;
+    try {
+      const { data } = await axiosInstance.get("/api/customers");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener clientes:", error);
+      return [];
+    }
+  },
+};
+
+// --- TAREAS (para empleados) ---
+export const taskApi = {
+  getMyTasks: async () => {
+    try {
+      const { data } = await axiosInstance.get("/api/employee/tasks");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener tareas:", error);
+      return [];
+    }
+  },
+};
+
+// --- ASISTENCIA (para empleados) ---
+export const attendanceApi = {
+  getMyAttendance: async () => {
+    try {
+      const { data } = await axiosInstance.get("/api/employee/attendance");
+      return data;
+    } catch (error) {
+      console.error("Error al obtener asistencia:", error);
+      return [];
+    }
   },
 };

@@ -1,30 +1,63 @@
-import { Outlet } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
+// employes/src/layouts/DashboardLayout.jsx
+import { Outlet, useNavigate } from "react-router-dom";
+import { LogOutIcon, UserIcon } from "lucide-react";
 
-function DashboardLayout() {
+function DashboardLayout({ onLogout, employee }) {
+  const navigate = useNavigate();
+
   return (
-    <div className="drawer lg:drawer-open">
-      <input id="my-drawer" type="checkbox" className="drawer-toggle" />
-
-      {/* CONTENIDO PRINCIPAL */}
-      <div className="drawer-content flex flex-col bg-base-200">
-        <Navbar />
-        <main className="p-4 md:p-8 min-h-[calc(100vh-64px)] overflow-auto">
-          {/* Aquí se renderizan las páginas: DashboardPage, TasksPage, etc. */}
-          <div className="max-w-6xl mx-auto">
-             <Outlet />
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className="hidden lg:block w-64 bg-white border-r border-gray-200 shadow-sm">
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">Portal Empleado</h1>
+          <p className="text-xs text-gray-500 mt-1">Sistema Interno</p>
+        </div>
+        
+        <nav className="p-4 space-y-1">
+          <button onClick={() => navigate("/dashboard")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            📊 Dashboard
+          </button>
+          <button onClick={() => navigate("/tasks")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            ✅ Mis Tareas
+          </button>
+          <button onClick={() => navigate("/attendance")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            📅 Asistencia
+          </button>
+          <button onClick={() => navigate("/customers")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            👥 Clientes
+          </button>
+          <button onClick={() => navigate("/products")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            📦 Productos
+          </button>
+          <button onClick={() => navigate("/profile")} className="w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+            👤 Mi Perfil
+          </button>
+        </nav>
+        
+        <div className="absolute bottom-0 w-64 p-4 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">{employee?.name || "Empleado"}</p>
+                <p className="text-xs text-gray-500 capitalize">{employee?.role || "employee"}</p>
+              </div>
+            </div>
+            <button onClick={onLogout} className="text-red-600 hover:text-red-700">
+              <LogOutIcon className="w-5 h-5" />
+            </button>
           </div>
-        </main>
+        </div>
       </div>
 
-      {/* SIDEBAR */}
-      <div className="drawer-side z-50">
-        <label
-          htmlFor="my-drawer"
-          className="drawer-overlay"
-        ></label>
-        <Sidebar />
+      {/* Contenido principal */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
       </div>
     </div>
   );

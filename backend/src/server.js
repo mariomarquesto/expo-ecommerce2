@@ -13,7 +13,8 @@ import productRouter from "./routes/product.route.js";
 import orderRouter from "./routes/order.route.js";
 import adminRouter from "./routes/admin.route.js";
 import mobileRouter from "./routes/mobile.route.js"; 
-import customerRouter from "./routes/customer.routes.js"; // 1️⃣ Importamos las nuevas rutas
+import customerRouter from "./routes/customer.routes.js";
+import employeeAuthRoutes from "./routes/employeeAuth.routes.js";
 
 const app = express();
 const __dirname = path.resolve();
@@ -22,7 +23,7 @@ const __dirname = path.resolve();
 // 1️⃣ MIDDLEWARES INICIALES
 // ------------------------------
 app.use(cors({
-  origin: ["http://localhost:5173", "http://10.171.241.150:8081"], 
+  origin: ["http://localhost:5173", "http://localhost:5174", "http://10.171.241.150:8081"], 
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -46,7 +47,8 @@ app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/admin", adminRouter);
-app.use("/api/customers", customerRouter); // 2️⃣ Registramos la ruta de clientes
+app.use("/api/customers", customerRouter);
+app.use("/api/employees", employeeAuthRoutes); // ✅ CORREGIDO
 
 // Servir archivos estáticos
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

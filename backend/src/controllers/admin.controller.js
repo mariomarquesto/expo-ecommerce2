@@ -263,3 +263,45 @@ export async function createOrder(req, res) {
     });
   }
 }
+export async function getOrderById(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id)
+      .populate("user", "name email")
+      .populate("orderItems.product");
+    
+    if (!order) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+    
+    res.status(200).json(order);
+  } catch (error) {
+    console.error("Error al obtener orden:", error);
+    res.status(500).json({ message: "Error al obtener la orden" });
+  }
+}
+
+// También agregá la función deleteOrder
+export async function deleteOrder(req, res) {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+    
+    if (!order) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+    
+    // Restaurar stock de productos
+    for (const item of order.orderItems) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: item.quantity }
+      });
+    }
+    
+    await Order.findByIdAndDelete(id);
+    res.status(200).json({ message: "Orden eliminada con éxito" });
+  } catch (error) {
+    console.error("Error al eliminar orden:", error);
+    res.status(500).json({ message: "Error al eliminar la orden" });
+  }
+}

@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { 
   getAllProducts,
+   getOrderById,
   createProduct,    // ✅ AGREGAR
   updateProduct,    // ✅ AGREGAR
-  deleteProduct,    // ✅ AGREGAR
+  deleteProduct, 
+   deleteOrder,   // ✅ AGREGAR
   getAllOrders, 
   getDashboardStats,
   updateOrderStatus,
@@ -26,6 +28,7 @@ router.delete("/products/:id", deleteProduct); // ✅ AGREGAR
 
 // 2. ÓRDENES
 router.get("/orders", getAllOrders);
+router.get("/orders/:id", getOrderById);
 router.post("/orders", createOrder);
 router.patch("/orders/:orderId/status", updateOrderStatus);
 

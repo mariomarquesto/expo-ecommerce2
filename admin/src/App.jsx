@@ -10,7 +10,7 @@ import CustomersPage from "./pages/CustomersPage";
 import DashboardLayout from "./layouts/DashboardLayout";
 import PageLoader from "./components/PageLoader";
 import CreateOrderPage from "./pages/CreateOrderPage";
-
+import OrderDetailPage from "./pages/OrderDetailPage";
 
 
 function App() {
@@ -29,6 +29,7 @@ function App() {
         <Route path="products/new" element={<NewProductPage />} /> {/* ← Ruta para nuevo producto */}
         <Route path="products/edit/:id" element={<EditProductPage />} />
         <Route path="orders" element={<OrdersPage />} />
+        <Route path="orders/:id" element={<OrderDetailPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="orders/new" element={<CreateOrderPage />} />
       </Route>

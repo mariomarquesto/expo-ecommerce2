@@ -1,50 +1,64 @@
+// employes/src/App.jsx
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useState } from "react";
 
-// Layout y Loader
+// Layout
 import DashboardLayout from "./layouts/DashboardLayout";
-import PageLoader from "./components/PageLoader";
 
-// Páginas de Login
+// Páginas
 import LoginPage from "./pages/LoginPage";
-
-// Nuevas Páginas de Empleados (Asegúrate de haber creado estos archivos)
 import DashboardPage from "./pages/DashboardPage";
 import MyTasksPage from "./pages/MyTasksPage";
 import AttendancePage from "./pages/AttendancePage";
-import CustomerPage from "./pages/CustomersPage"
-function App() {
-  const { isSignedIn, isLoaded } = useAuth();
+import CustomersPage from "./pages/CustomersPage";
+import ProductsPage from "./pages/ProductsPage";
 
-  // Esperar a que Clerk cargue la sesión
-  if (!isLoaded) return <PageLoader />;
+function App() {
+  // Inicializar estado directamente desde localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = localStorage.getItem("employeeToken");
+    return !!token;
+  });
+  
+  const [employee, setEmployee] = useState(() => {
+    const savedEmployee = localStorage.getItem("employee");
+    return savedEmployee ? JSON.parse(savedEmployee) : null;
+  });
+
+  const handleLogin = (employeeData, token) => {
+    localStorage.setItem("employeeToken", token);
+    localStorage.setItem("employee", JSON.stringify(employeeData));
+    setIsAuthenticated(true);
+    setEmployee(employeeData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("employeeToken");
+    localStorage.removeItem("employee");
+    setIsAuthenticated(false);
+    setEmployee(null);
+  };
 
   return (
     <Routes>
-      {/* Ruta de Login: Si ya está logueado, lo manda al dashboard */}
       <Route 
         path="/login" 
-        element={isSignedIn ? <Navigate to="/dashboard" /> : <LoginPage />} 
+        element={isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage onLogin={handleLogin} />} 
       />
 
-      {/* Rutas Protegidas bajo el DashboardLayout */}
       <Route 
         path="/" 
-        element={isSignedIn ? <DashboardLayout /> : <Navigate to="/login" />}
+        element={isAuthenticated ? <DashboardLayout onLogout={handleLogout} employee={employee} /> : <Navigate to="/login" />}
       >
-        {/* Redirección automática de la raíz al dashboard */}
         <Route index element={<Navigate to="dashboard" />} />
-        
-        {/* Vistas del empleado */}
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="tasks" element={<MyTasksPage />} />
-        <Route path="attendance" element={<AttendancePage />} />
-        <Route path="customers" element={<CustomerPage/>}/>
-        {/* Perfil (puedes dejarlo como placeholder o crear la página luego) */}
-        <Route path="profile" element={<div className="p-10 font-bold">Mi Perfil (En construcción)</div>} />
+        <Route path="dashboard" element={<DashboardPage employee={employee} />} />
+        <Route path="tasks" element={<MyTasksPage employee={employee} />} />
+        <Route path="attendance" element={<AttendancePage employee={employee} />} />
+        <Route path="customers" element={<CustomersPage />} />
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="profile" element={<div className="p-10 font-bold text-gray-900">Mi Perfil - {employee?.name}</div>} />
       </Route>
 
-      {/* Comodín: Si la ruta no existe, vuelve al inicio */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
