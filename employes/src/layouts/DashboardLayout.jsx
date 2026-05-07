@@ -12,13 +12,12 @@ function DashboardLayout({ onLogout, employee }) {
     { name: "Asistencia", path: "/attendance", icon: <Clock className="w-5 h-5" /> },
     { name: "Clientes", path: "/customers", icon: <Users className="w-5 h-5" /> },
     { name: "Productos", path: "/products", icon: <Package className="w-5 h-5" /> },
-    { name: "Ventas", path: "/sales", icon: <ShoppingBag className="w-5 h-5" /> },
+    { name: "Órdenes", path: "/orders", icon: <ShoppingBag className="w-5 h-5" /> }, // ← Cambiado
     { name: "Mi Perfil", path: "/profile", icon: <UserCircle className="w-5 h-5" /> },
   ];
 
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
       <div className="hidden lg:block w-64 bg-white border-r border-gray-200 shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-bold text-gray-900">Portal Empleado</h1>
@@ -60,7 +59,6 @@ function DashboardLayout({ onLogout, employee }) {
         </div>
       </div>
 
-      {/* Contenido principal */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto">
           <Outlet />

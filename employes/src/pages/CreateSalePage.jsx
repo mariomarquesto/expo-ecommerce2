@@ -2,8 +2,57 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { productApi, orderApi, customerApi } from "../lib/api";
-import { ArrowLeftIcon, PlusIcon, Trash2Icon, SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, Trash2Icon } from "lucide-react";
+
+// Configuración de API
+const API_URL = "http://localhost:3000/api"; // Cambia por tu URL
+
+const getToken = () => localStorage.getItem("employeeToken");
+
+// API Calls
+const fetchProducts = async () => {
+  try {
+    const response = await fetch(`${API_URL}/employee/products`, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    });
+    if (!response.ok) throw new Error("Error al cargar productos");
+    return response.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};
+
+const fetchCustomers = async () => {
+  try {
+    const response = await fetch(`${API_URL}/employee/customers`, {
+      headers: { Authorization: `Bearer ${getToken()}` }
+    });
+    if (!response.ok) throw new Error("Error al cargar clientes");
+    return response.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return [];
+  }
+};
+
+const createOrder = async (orderData) => {
+  const response = await fetch(`${API_URL}/employee/orders`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`
+    },
+    body: JSON.stringify(orderData)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Error al crear la orden");
+  }
+
+  return response.json();
+};
 
 export default function CreateSalePage() {
   const navigate = useNavigate();
@@ -12,6 +61,7 @@ export default function CreateSalePage() {
   const [form, setForm] = useState({
     customerId: "",
     orderItems: [],
+    paymentMethod: "cash",
     shippingAddress: {
       fullName: "",
       streetAddress: "",
@@ -27,37 +77,30 @@ export default function CreateSalePage() {
     quantity: 1,
   });
 
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const { data: products, isLoading: productsLoading } = useQuery({
+  // Cargar productos y clientes
+  const { data: products = [], isLoading: productsLoading } = useQuery({
     queryKey: ["products"],
-    queryFn: productApi.getAll,
+    queryFn: fetchProducts,
   });
 
-  const { data: customers, isLoading: customersLoading } = useQuery({
+  const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ["customers"],
-    queryFn: customerApi.getAll,
+    queryFn: fetchCustomers,
   });
 
+  // Mutación para crear orden
   const createOrderMutation = useMutation({
-    mutationFn: orderApi.create,
+    mutationFn: createOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboardStats"] });
-      alert("✅ Venta registrada correctamente");
+      alert("✅ Orden creada correctamente");
       navigate("/sales");
     },
     onError: (error) => {
       console.error("Error:", error);
-      alert("❌ Error al registrar la venta");
+      alert(`❌ Error al crear la orden: ${error.message}`);
     },
   });
-
-  // Filtrar productos por búsqueda
-  const filteredProducts = products?.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const addProductToOrder = () => {
     if (!selectedProduct.productId || selectedProduct.quantity < 1) {
@@ -69,7 +112,7 @@ export default function CreateSalePage() {
     if (!product) return;
 
     // Verificar stock
-    if (selectedProduct.quantity > product.stock) {
+    if (product.stock < selectedProduct.quantity) {
       alert(`Stock insuficiente. Solo hay ${product.stock} unidades disponibles.`);
       return;
     }
@@ -89,7 +132,6 @@ export default function CreateSalePage() {
     }));
 
     setSelectedProduct({ productId: "", quantity: 1 });
-    setSearchTerm("");
   };
 
   const removeProduct = (index) => {
@@ -99,26 +141,34 @@ export default function CreateSalePage() {
     }));
   };
 
-  const updateQuantity = (index, newQuantity) => {
-    if (newQuantity < 1) return;
-    const product = form.orderItems[index];
-    const originalProduct = products?.find(p => p._id === product.product);
-    
-    if (newQuantity > originalProduct.stock) {
-      alert(`Stock insuficiente. Solo hay ${originalProduct.stock} unidades disponibles.`);
-      return;
-    }
-    
+  const calculateTotal = () => {
+    return form.orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  };
+
+  const handleCustomerChange = (customerId) => {
+    const customer = customers?.find(c => c._id === customerId);
     setForm(prev => ({
       ...prev,
-      orderItems: prev.orderItems.map((item, i) =>
-        i === index ? { ...item, quantity: newQuantity } : item
-      ),
+      customerId,
+      shippingAddress: {
+        fullName: customer?.name || "",
+        streetAddress: customer?.address || "",
+        city: prev.shippingAddress.city || "",
+        state: prev.shippingAddress.state || "",
+        zipCode: prev.shippingAddress.zipCode || "",
+        phoneNumber: customer?.phone || "",
+      },
     }));
   };
 
-  const calculateTotal = () => {
-    return form.orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const handleAddressChange = (e) => {
+    setForm(prev => ({
+      ...prev,
+      shippingAddress: {
+        ...prev.shippingAddress,
+        [e.target.name]: e.target.value,
+      },
+    }));
   };
 
   const handleSubmit = (e) => {
@@ -138,8 +188,14 @@ export default function CreateSalePage() {
 
     const orderData = {
       user: form.customerId,
-      clerkId: "sale_created",
-      orderItems: form.orderItems,
+      clerkId: "employee_created",
+      orderItems: form.orderItems.map(item => ({
+        product: item.product,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      })),
       shippingAddress: {
         fullName: form.shippingAddress.fullName || selectedCustomer?.name || "",
         streetAddress: form.shippingAddress.streetAddress || selectedCustomer?.address || "",
@@ -149,36 +205,11 @@ export default function CreateSalePage() {
         phoneNumber: form.shippingAddress.phoneNumber || selectedCustomer?.phone || "",
       },
       totalPrice: calculateTotal(),
+      paymentMethod: form.paymentMethod,
       status: "pending",
     };
 
     createOrderMutation.mutate(orderData);
-  };
-
-  const handleAddressChange = (e) => {
-    setForm(prev => ({
-      ...prev,
-      shippingAddress: {
-        ...prev.shippingAddress,
-        [e.target.name]: e.target.value,
-      },
-    }));
-  };
-
-  const handleCustomerChange = (customerId) => {
-    const customer = customers?.find(c => c._id === customerId);
-    setForm(prev => ({
-      ...prev,
-      customerId,
-      shippingAddress: {
-        fullName: customer?.name || "",
-        streetAddress: customer?.address || "",
-        phoneNumber: customer?.phone || "",
-        city: prev.shippingAddress.city,
-        state: prev.shippingAddress.state,
-        zipCode: prev.shippingAddress.zipCode,
-      },
-    }));
   };
 
   if (productsLoading || customersLoading) {
@@ -191,23 +222,23 @@ export default function CreateSalePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="container mx-auto max-w-5xl">
+      <div className="container mx-auto max-w-4xl">
         <button
           onClick={() => navigate("/sales")}
           className="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
         >
           <ArrowLeftIcon className="w-5 h-5" />
-          Volver a ventas
+          Volver a Ventas
         </button>
 
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
-            <h1 className="text-2xl font-bold text-white">Nueva Venta</h1>
-            <p className="text-emerald-100 text-sm mt-1">Registrar una nueva venta</p>
+            <h1 className="text-2xl font-bold text-white">Nueva Venta / Orden</h1>
+            <p className="text-emerald-100 text-sm mt-1">Registrar una nueva orden de venta</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Cliente */}
+            {/* Selección de Cliente */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Cliente *
@@ -219,7 +250,7 @@ export default function CreateSalePage() {
                 required
               >
                 <option value="">Seleccionar cliente...</option>
-                {customers?.map((customer) => (
+                {customers.map((customer) => (
                   <option key={customer._id} value={customer._id}>
                     {customer.name} - {customer.email}
                   </option>
@@ -227,7 +258,7 @@ export default function CreateSalePage() {
               </select>
             </div>
 
-            {/* Dirección de envío */}
+            {/* Dirección de Envío */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Dirección de Envío</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -237,7 +268,7 @@ export default function CreateSalePage() {
                   placeholder="Nombre completo"
                   value={form.shippingAddress.fullName}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
                 <input
@@ -246,7 +277,7 @@ export default function CreateSalePage() {
                   placeholder="Dirección"
                   value={form.shippingAddress.streetAddress}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
                 <input
@@ -255,7 +286,7 @@ export default function CreateSalePage() {
                   placeholder="Ciudad"
                   value={form.shippingAddress.city}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
                 <input
@@ -264,7 +295,7 @@ export default function CreateSalePage() {
                   placeholder="Provincia"
                   value={form.shippingAddress.state}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
                 <input
@@ -273,7 +304,7 @@ export default function CreateSalePage() {
                   placeholder="Código Postal"
                   value={form.shippingAddress.zipCode}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
                 <input
@@ -282,131 +313,137 @@ export default function CreateSalePage() {
                   placeholder="Teléfono"
                   value={form.shippingAddress.phoneNumber}
                   onChange={handleAddressChange}
-                  className="px-4 py-2 border border-gray-300 rounded-lg"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
                   required
                 />
               </div>
             </div>
 
+            {/* Método de Pago */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Método de Pago *
+              </label>
+              <select
+                value={form.paymentMethod}
+                onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-white"
+              >
+                <option value="cash">Efectivo</option>
+                <option value="card">Tarjeta de Crédito/Débito</option>
+                <option value="transfer">Transferencia Bancaria</option>
+                <option value="mercadopago">Mercado Pago</option>
+              </select>
+            </div>
+
             {/* Productos */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Productos</h3>
-              
-              {/* Buscador y selector de productos */}
               <div className="flex gap-4">
-                <div className="flex-1 relative">
-                  <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar producto por nombre o categoría..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
                 <select
                   value={selectedProduct.productId}
                   onChange={(e) => setSelectedProduct({ ...selectedProduct, productId: e.target.value })}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 bg-white"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900 bg-white"
                 >
                   <option value="">Seleccionar producto...</option>
-                  {filteredProducts?.map((product) => (
+                  {products.map((product) => (
                     <option key={product._id} value={product._id}>
-                      {product.name} - ${product.price} (Stock: {product.stock})
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  placeholder="Cantidad"
-                  value={selectedProduct.quantity}
-                  onChange={(e) => setSelectedProduct({ ...selectedProduct, quantity: parseInt(e.target.value) || 1 })}
-                  className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  min="1"
-                />
-                <button
-                  type="button"
-                  onClick={addProductToOrder}
-                  className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700"
-                >
-                  <PlusIcon className="w-5 h-5" />
-                </button>
-              </div>
+                                      {product.name} - ${product.price} {product.stock !== undefined && `(Stock: ${product.stock})`}
+                                    </option>
+                                  ))}
+                                </select>
+                                <input
+                                  type="number"
+                                  placeholder="Cantidad"
+                                  value={selectedProduct.quantity}
+                                  onChange={(e) => setSelectedProduct({ ...selectedProduct, quantity: parseInt(e.target.value) })}
+                                  className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-gray-900"
+                                  min="1"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={addProductToOrder}
+                                  className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors"
+                                >
+                                  <PlusIcon className="w-5 h-5" />
+                                </button>
+                              </div>
 
-              {/* Lista de productos agregados */}
-              {form.orderItems.length > 0 && (
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Producto</th>
-                        <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Cantidad</th>
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Precio</th>
-                        <th className="text-right py-3 px-4 text-sm font-semibold text-gray-700">Subtotal</th>
-                        <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {form.orderItems.map((item, index) => (
-                        <tr key={index} className="border-t border-gray-100">
-                          <td className="py-3 px-4 text-gray-800">{item.name}</td>
-                          <td className="py-3 px-4 text-center">
-                            <input
-                              type="number"
-                              value={item.quantity}
-                              onChange={(e) => updateQuantity(index, parseInt(e.target.value) || 1)}
-                              className="w-20 px-2 py-1 text-center border border-gray-300 rounded-lg"
-                              min="1"
-                            />
-                          </td>
-                          <td className="py-3 px-4 text-right text-gray-800">${item.price.toFixed(2)}</td>
-                          <td className="py-3 px-4 text-right text-gray-800">${(item.price * item.quantity).toFixed(2)}</td>
-                          <td className="py-3 px-4 text-center">
-                            <button
-                              type="button"
-                              onClick={() => removeProduct(index)}
-                              className="text-red-600 hover:text-red-800"
-                            >
-                              <Trash2Icon className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot className="bg-gray-50 border-t">
-                      <tr>
-                        <td colSpan="3" className="text-right py-3 px-4 font-semibold text-gray-900">Total:</td>
-                        <td className="text-right py-3 px-4 font-bold text-emerald-600 text-lg">
-                          ${calculateTotal().toFixed(2)}
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              )}
-            </div>
+                              {/* Lista de productos agregados */}
+                              {form.orderItems.length > 0 && (
+                                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                  <table className="w-full">
+                                    <thead className="bg-gray-50">
+                                      <tr>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Producto</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Cantidad</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Precio</th>
+                                        <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Subtotal</th>
+                                        <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Acción</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {form.orderItems.map((item, index) => (
+                                        <tr key={index} className="border-t border-gray-100">
+                                          <td className="py-3 px-4 text-gray-800">{item.name}</td>
+                                          <td className="py-3 px-4 text-gray-800">{item.quantity}</td>
+                                          <td className="py-3 px-4 text-gray-800">${item.price.toFixed(2)}</td>
+                                          <td className="py-3 px-4 text-gray-800">${(item.price * item.quantity).toFixed(2)}</td>
+                                          <td className="py-3 px-4 text-center">
+                                            <button
+                                              type="button"
+                                              onClick={() => removeProduct(index)}
+                                              className="text-red-600 hover:text-red-800 transition-colors"
+                                            >
+                                              <Trash2Icon className="w-4 h-4" />
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                    <tfoot className="bg-gray-50 border-t border-gray-200">
+                                      <tr>
+                                        <td colSpan="3" className="text-right py-3 px-4 font-semibold text-gray-900">
+                                          Total:
+                                        </td>
+                                        <td className="py-3 px-4 text-lg font-bold text-emerald-600">
+                                          ${calculateTotal().toFixed(2)}
+                                        </td>
+                                        <td></td>
+                                      </tr>
+                                    </tfoot>
+                                  </table>
+                                </div>
+                              )}
+                            </div>
 
-            {/* Botones */}
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={createOrderMutation.isPending}
-                className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 font-semibold disabled:opacity-50"
-              >
-                {createOrderMutation.isPending ? "Registrando..." : "Registrar Venta"}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/sales")}
-                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold"
-              >
-                Cancelar
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  );
-}
+                            {/* Botones de acción */}
+                            <div className="flex gap-3 pt-4">
+                              <button
+                                type="submit"
+                                disabled={createOrderMutation.isPending}
+                                className="flex-1 bg-emerald-600 text-white py-3 rounded-lg hover:bg-emerald-700 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {createOrderMutation.isPending ? (
+                                  <div className="flex items-center justify-center gap-2">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    Creando...
+                                  </div>
+                                ) : (
+                                  "Crear Venta / Orden"
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => navigate("/sales")}
+                                className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 font-semibold transition-colors"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }

@@ -28,6 +28,31 @@ export const orderApi = {
       return [];
     }
   },
+
+  getById: async (orderId) => {
+    try {
+      const { data } = await axiosInstance.get(`/api/admin/orders/${orderId}`);
+      return data;
+    } catch (error) {
+      console.error("Error al obtener orden:", error);
+      return null;
+    }
+  },
+
+  create: async (orderData) => {
+    const { data } = await axiosInstance.post("/api/admin/orders", orderData);
+    return data;
+  },
+
+  updateStatus: async ({ orderId, status }) => {
+    const { data } = await axiosInstance.patch(`/api/admin/orders/${orderId}/status`, { status });
+    return data;
+  },
+
+  delete: async (orderId) => {
+    const { data } = await axiosInstance.delete(`/api/admin/orders/${orderId}`);
+    return data;
+  },
 };
 
 // --- PRODUCTOS (usar las mismas que admin) ---
